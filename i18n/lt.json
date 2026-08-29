@@ -1119,7 +1119,7 @@
       "optInSponsorship": "Gali tik rėmėjai."
     },
     "version": {
-      "availableLong": "(yra naujesnė versija)",
+      "availableLong": "yra naujesnė versija",
       "community": "evcc bendruomenė",
       "labelEmail": "El. paštas",
       "labelPhone": "Telefonas",
@@ -1326,15 +1326,18 @@
         "continuous": "be pertraukos",
         "continuousCo2Description": "Parenka švariausią nepertraukiamą laikotarpių seriją.",
         "continuousPriceDescription": "Pasirenkama pigiausia ištisinė laikotarpių serija.",
+        "disabledDescription": "Reikalingas dinaminis tarifas arba CO₂ prognozė.",
         "label": "Optimizacija"
       },
       "planNumber": "Planas {number}",
       "precondition": {
         "description": "Dalis įkrovimo perkeliama prieš pat išvykstant: pašyla baterija, trumpiau būna su aukštu įkrovimo lygiu.",
+        "disabledDescription": "Visas įkrovimas atliekamas prieš pat išvykimą.",
         "label": "Vėlyvas įkrovimas",
         "optionAll": "viskas",
         "optionNo": "ne",
-        "summary": "{precondition} prieš"
+        "summary": "{precondition} prieš",
+        "summaryAll": "prieš pat išvykimą"
       },
       "remove": "Pašalinti",
       "repeating": "kartojasi",
@@ -1549,7 +1552,7 @@
     "vehicleSettings": {
       "connectedTo": "prijungta prie {0}",
       "description": "Šie numatytieji nustatymai taikomi, kai transporto priemonė prijungiama prie įkroviklio.",
-      "editHint": "Pridėkite arba redaguokite automobilius {0}.",
+      "editHint": "Automobilius galite redaguoti čia {0}.",
       "keepAsIs": "Palikti kaip yra",
       "learnMore": "Sužinoti daugiau.",
       "limitSoc": "Numatytasis limitas",
