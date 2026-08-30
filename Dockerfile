@@ -3,8 +3,10 @@ FROM --platform=$BUILDPLATFORM node:26-alpine AS node
 
 RUN apk update && apk add --no-cache make curl bash && curl -fsSL https://vite.plus | bash
 
-# the installer only wires vp into interactive shell rc files, which RUN steps don't source
-ENV PATH="/root/.vite-plus/bin:${PATH}"
+# the installer only wires vp into interactive shell rc files, which RUN steps
+# do not source. Current installers use .local/share; retain the older path for
+# stable-tag reproducibility.
+ENV PATH="/root/.local/share/vite-plus/bin:/root/.vite-plus/bin:${PATH}"
 
 WORKDIR /build
 

@@ -23,6 +23,7 @@ jobs:
         with:
           go-version-file: go.mod
           cache: true
+      - run: grep -Fq '/root/.local/share/vite-plus/bin' Dockerfile
       - run: go test ./util/homeassistant ./util/templates
       - run: go test ./charger -run '^TestTemplates/sems-ev-connect$' -count=1
       - run: go test ./meter -run '^TestTemplates/sems-goodwe-home-energy' -count=1
