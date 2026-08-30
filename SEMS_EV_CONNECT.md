@@ -25,5 +25,7 @@ go test ./charger -run '^TestTemplates/sems-ev-connect$' -count=1
 go test ./meter -run '^TestTemplates/sems-goodwe-home-energy' -count=1
 ```
 
-The release workflow also checks that the maintained branch still descends
-from the pinned EVCC `0.314.5` tag before an upstream update is accepted.
+The release workflow checks weekly that the maintained branch still descends
+from the pinned EVCC `0.314.5` tag and whether a newer upstream release needs
+review. Dependency updates are proposed as pull requests for testing. Neither
+maintenance path publishes or deploys an image automatically.
