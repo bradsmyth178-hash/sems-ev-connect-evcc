@@ -68,6 +68,32 @@ func TestNewStatusMapDuplicate(t *testing.T) {
 	assert.Error(t, err)
 }
 
+func TestValidatePhaseEntities(t *testing.T) {
+	tests := []struct {
+		name     string
+		entities []string
+		want     []string
+		wantErr  bool
+	}{
+		{"none", nil, nil, false},
+		{"single phase", []string{"sensor.current_l1"}, []string{"sensor.current_l1"}, false},
+		{"three phase", []string{"sensor.l1", "sensor.l2", "sensor.l3"}, []string{"sensor.l1", "sensor.l2", "sensor.l3"}, false},
+		{"two phase", []string{"sensor.l1", "sensor.l2"}, nil, true},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			got, err := ValidatePhaseEntities(tc.entities)
+			if tc.wantErr {
+				require.Error(t, err)
+				return
+			}
+			require.NoError(t, err)
+			assert.Equal(t, tc.want, got)
+		})
+	}
+}
+
 // TestStatusMapExtendsBuiltin verifies that configured states extend the
 // built-in mapping and only override the states they explicitly redefine.
 func TestStatusMapExtendsBuiltin(t *testing.T) {

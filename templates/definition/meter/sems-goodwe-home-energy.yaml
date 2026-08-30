@@ -1,0 +1,68 @@
+template: sems-goodwe-home-energy
+products:
+  - brand: SEMS EV CONNECT
+    description:
+      generic: GoodWe Home Energy System
+group: generic
+requirements:
+  description:
+    en: Uses the solar, grid and battery entities already available in Home Assistant.
+    de: Verwendet die bereits in Home Assistant verfügbaren Solar-, Netz- und Batterie-Entitäten.
+auth:
+  type: homeassistant
+  params: [uri, insecure]
+params:
+  - name: usage
+    choice: ["grid", "pv", "battery"]
+  - name: uri
+    description:
+      en: Home Assistant URI
+      de: Home Assistant URI
+    default: http://supervisor/core
+    service: homeassistant/instances
+    required: true
+  - name: insecure
+  - name: power
+    description:
+      en: Power entity
+      de: Leistungsentität
+    service: homeassistant/entities?uri={uri}&insecure={insecure}&domain=sensor
+    example: sensor.goodwe_power
+    required: true
+  - name: energy
+    description:
+      en: Imported or charged lifetime energy
+      de: Bezogene oder geladene Gesamtenergie
+    service: homeassistant/entities?uri={uri}&insecure={insecure}&domain=sensor
+    example: sensor.goodwe_energy
+    advanced: true
+  - name: returnEnergy
+    description:
+      en: Exported or discharged lifetime energy
+      de: Eingespeiste oder entladene Gesamtenergie
+    service: homeassistant/entities?uri={uri}&insecure={insecure}&domain=sensor
+    example: sensor.goodwe_return_energy
+    advanced: true
+  - name: soc
+    usages: ["battery"]
+    description:
+      en: Battery state of charge
+      de: Batterieladestand
+    service: homeassistant/entities?uri={uri}&insecure={insecure}&domain=sensor
+    example: sensor.goodwe_battery_state_of_charge
+    required: true
+  - name: capacity
+    usages: ["battery"]
+  - name: maxacpower
+render: |
+  type: homeassistant
+  uri: {{ .uri }}
+  insecure: {{ .insecure }}
+  power: {{ .power }}
+  energy: {{ .energy }}
+  returnenergy: {{ .returnEnergy }}
+  maxacpower: {{ .maxacpower }}
+  {{- if eq .usage "battery" }}
+  soc: {{ .soc }}
+  capacity: {{ .capacity }}
+  {{- end }}
