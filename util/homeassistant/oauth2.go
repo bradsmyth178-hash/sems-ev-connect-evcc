@@ -6,6 +6,7 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 
 	"github.com/evcc-io/evcc/plugin/auth"
@@ -47,6 +48,10 @@ func NewHomeAssistantFromConfig(other map[string]any) (oauth2.TokenSource, error
 func NewHomeAssistant(uri string, insecure bool) (oauth2.TokenSource, error) {
 	uri = strings.TrimRight(uri, "/") // normalize
 
+	if source, ok := supervisorTokenSource(uri); ok {
+		return source, nil
+	}
+
 	extUrl := network.Config().ExternalURL()
 	redirectUri := extUrl + network.CallbackPath
 
@@ -86,4 +91,27 @@ func NewHomeAssistant(uri string, insecure bool) (oauth2.TokenSource, error) {
 	}
 
 	return auth.NewOAuth(ctx, "HomeAssistant", host, &oc)
+}
+
+// supervisorTokenSource uses the token injected into a Home Assistant app.
+// Keep this restricted to the Supervisor's internal Core proxy so the token
+// can never be forwarded to a user-supplied or internet host.
+func supervisorTokenSource(uri string) (oauth2.TokenSource, bool) {
+	token := strings.TrimSpace(os.Getenv("SUPERVISOR_TOKEN"))
+	if token == "" {
+		return nil, false
+	}
+
+	u, err := url.Parse(uri)
+	if err != nil || u.Scheme != "http" || u.Hostname() != "supervisor" {
+		return nil, false
+	}
+	if u.Path != "/core" && !strings.HasPrefix(u.Path, "/core/") {
+		return nil, false
+	}
+
+	return oauth2.StaticTokenSource(&oauth2.Token{
+		AccessToken: token,
+		TokenType:   "Bearer",
+	}), true
 }
