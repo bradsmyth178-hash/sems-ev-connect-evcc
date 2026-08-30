@@ -1,0 +1,91 @@
+template: sems-ev-connect
+products:
+  - brand: SEMS EV CONNECT
+    description:
+      generic: Smart Charging
+capabilities: ["dim"]
+group: generic
+requirements:
+  description:
+    en: Requires the SEMS EV CONNECT Home Assistant integration. Home Assistant suggests the matching charger entities after authorisation.
+    de: Benötigt die SEMS EV CONNECT Home Assistant Integration. Home Assistant schlägt nach der Autorisierung die passenden Ladepunkt-Entitäten vor.
+auth:
+  type: homeassistant
+  params: [uri, insecure]
+params:
+  - name: uri
+    description:
+      en: Home Assistant URI
+      de: Home Assistant URI
+    default: http://supervisor/core
+    service: homeassistant/instances
+    required: true
+  - name: insecure
+  - name: status
+    description:
+      en: EVCC status sensor
+      de: EVCC Statussensor
+    service: homeassistant/entities?uri={uri}&insecure={insecure}&domain=sensor
+    example: sensor.sems_ev_connect_evcc_status
+    required: true
+  - name: enabled
+    description:
+      en: Charging status switch
+      de: Ladestatus-Schalter
+    service: homeassistant/entities?uri={uri}&insecure={insecure}&domain=switch
+    example: switch.sems_ev_connect_charging
+    required: true
+  - name: enable
+    description:
+      en: Start and stop switch
+      de: Start- und Stoppschalter
+    service: homeassistant/entities?uri={uri}&insecure={insecure}&domain=switch
+    example: switch.sems_ev_connect_charging
+    required: true
+  - name: setMaxCurrent
+    description:
+      en: Maximum charging current
+      de: Maximaler Ladestrom
+    service: homeassistant/entities?uri={uri}&insecure={insecure}&domain=number
+    example: number.sems_ev_connect_maximum_charging_current
+    required: true
+  - name: power
+    description:
+      en: Charging power
+      de: Ladeleistung
+    service: homeassistant/entities?uri={uri}&insecure={insecure}&domain=sensor
+    example: sensor.sems_ev_connect_charging_power
+    required: true
+  - name: currentL1
+    description:
+      en: Charging current
+      de: Ladestrom
+    service: homeassistant/entities?uri={uri}&insecure={insecure}&domain=sensor
+    example: sensor.sems_ev_connect_charging_current
+    advanced: true
+  - name: voltageL1
+    description:
+      en: Charging voltage
+      de: Ladespannung
+    service: homeassistant/entities?uri={uri}&insecure={insecure}&domain=sensor
+    example: sensor.sems_ev_connect_charging_voltage
+    advanced: true
+  - preset: charger-features
+render: |
+  type: homeassistant
+  uri: {{ .uri }}
+  insecure: {{ .insecure }}
+  status: {{ .status }}
+  enabled: {{ .enabled }}
+  enable: {{ .enable }}
+  maxcurrent: {{ .setMaxCurrent }}
+  power: {{ .power }}
+  {{- if .currentL1 }}
+  currents:
+    - {{ .currentL1 }}
+  {{- end }}
+  {{- if .voltageL1 }}
+  voltages:
+    - {{ .voltageL1 }}
+  {{- end }}
+  {{ include "charger-features" . }}

@@ -347,7 +347,7 @@ func ValidatePhaseEntities(phases []string) ([]string, error) {
 	switch len(entities) {
 	case 0:
 		return nil, nil
-	case 3:
+	case 1, 3:
 		return entities, nil
 	default:
 		return nil, errors.New("invalid phase entities")

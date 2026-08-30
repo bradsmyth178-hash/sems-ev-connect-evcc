@@ -1,0 +1,71 @@
+name: SEMS EV CONNECT release
+
+on:
+  pull_request:
+  push:
+    branches:
+      - "sems-*"
+      - "codex/**"
+    tags:
+      - "sems-v*"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+      - run: go test ./util/homeassistant ./util/templates
+      - run: go test ./charger -run '^TestTemplates/sems-ev-connect$' -count=1
+      - run: go test ./meter -run '^TestTemplates/sems-goodwe-home-energy' -count=1
+
+  image:
+    if: startsWith(github.ref, 'refs/tags/sems-v') || github.event_name == 'workflow_dispatch'
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/metadata-action@v5
+        id: meta
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/sems-ev-connect-evcc
+          tags: |
+            type=ref,event=tag
+            type=raw,value=0.1.0
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          build-args: |
+            RELEASE=1
+            TAG_NAME=0.314.5-sems.0.1.0
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+  upstream-drift:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: |
+          git remote add upstream https://github.com/evcc-io/evcc.git
+          git fetch --tags upstream
+          test "$(git merge-base HEAD refs/tags/0.314.5)" = "$(git rev-list -n 1 refs/tags/0.314.5)"
