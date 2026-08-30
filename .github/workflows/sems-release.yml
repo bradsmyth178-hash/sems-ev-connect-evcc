@@ -9,6 +9,8 @@ on:
     tags:
       - "sems-v*"
   workflow_dispatch:
+  schedule:
+    - cron: "17 2 * * 0"
 
 permissions:
   contents: read
@@ -60,13 +62,22 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
 
   upstream-drift:
-    if: github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - run: |
+      - name: Check the pinned EVCC base against upstream releases
+        run: |
+          pinned="0.314.5"
           git remote add upstream https://github.com/evcc-io/evcc.git
           git fetch --tags upstream
-          test "$(git merge-base HEAD refs/tags/0.314.5)" = "$(git rev-list -n 1 refs/tags/0.314.5)"
+          test "$(git merge-base HEAD "refs/tags/${pinned}")" = "$(git rev-list -n 1 "refs/tags/${pinned}")"
+          latest="$(git tag --list '[0-9]*' --sort=-version:refname | head -n 1)"
+          echo "Pinned EVCC base: ${pinned}"
+          echo "Latest upstream release: ${latest}"
+          if [ "${latest}" != "${pinned}" ]; then
+            echo "::error::A newer upstream EVCC release (${latest}) needs review; no image was deployed."
+            exit 1
+          fi
